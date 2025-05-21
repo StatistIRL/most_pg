@@ -1,19 +1,16 @@
-import os
 from ..settings import DatabaseSettings
 from alembic import command, config
 import asyncio
-
-script_dir = os.path.dirname(os.path.realpath(__file__))
-
-ALEMBIC_INI_PATH = os.path.abspath(os.path.join(script_dir, "..", "alembic.ini"))
+import most_pg
+from importlib import resources
 
 class DatabaseManager:
     def __init__(self, settings: DatabaseSettings):
         self._settings = settings
     
     def run_migrations(self):
-        print(ALEMBIC_INI_PATH)
-        alembic_cfg = config.Config(ALEMBIC_INI_PATH)
+        alembic_ini_path = resources.files(most_pg) / 'alembic.ini'
+        alembic_cfg = config.Config(alembic_ini_path)
         alembic_cfg.set_main_option("sqlalchemy.url", self._settings.url)
         command.upgrade(config=alembic_cfg, revision="head")
     

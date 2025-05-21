@@ -9,12 +9,12 @@ class DatabaseManager:
         self._settings = settings
     
     def run_migrations(self):
-        alembic_ini_path = str(resources.files(most_pg) / 'alembic.ini')
-        alembic_scripts_path = str(resources.files(most_pg) / 'alembic')
-        alembic_cfg = config.Config(alembic_ini_path)
-        alembic_cfg.set_main_option("script_location", alembic_scripts_path)
-        alembic_cfg.set_main_option("sqlalchemy.url", self._settings.url)
-        command.upgrade(config=alembic_cfg, revision="head")
+        with resources.as_file(resources.files(most_pg) / "alembic.ini") as ini_file, \
+            resources.as_file(resources.files(most_pg) / "alembic") as alembic_dir:
+            alembic_cfg = config.Config(str(ini_file))
+            alembic_cfg.set_main_option("script_location", str(alembic_dir))
+            alembic_cfg.set_main_option("sqlalchemy.url", self._settings.url)
+            command.upgrade(config=alembic_cfg, revision="head")
     
     async def init_database(self):
         loop = asyncio.get_event_loop()
